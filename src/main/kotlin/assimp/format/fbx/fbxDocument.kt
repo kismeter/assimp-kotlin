@@ -144,7 +144,7 @@ class LazyObject(val id: Long, val element: Element, val doc: Document) {
             flags = flags or Flags.FAILED_TO_CONSTRUCT
 
             // note: the error message is already formatted, so raw logging is ok
-            logger.error(ex.toString())
+            logger.error(ex) {}
 
             if (dieOnError || doc.settings.strictMode) throw Exception()
         }
@@ -552,7 +552,7 @@ class Material(id: Long, element: Element, doc: Document, name: String) : Object
         shading = if (shadingModel != null) shadingModel[0].parseAsString
         else "phong".also { domWarning("shading mode not specified, assuming phong", element) }
 
-        val templateName = when (shading) {
+        val templateName = when (shading.toLowerCase()) {
             "phong" -> "Material.FbxSurfacePhong"
             "lambert" -> "Material.FbxSurfaceLambert"
             else -> "".also { domWarning("shading mode not recognized: $shading", element) }
