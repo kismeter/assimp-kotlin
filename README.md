@@ -1,10 +1,11 @@
 # assimp
 
-[![Build Status](https://travis-ci.org/kotlin-graphics/assimp.svg?branch=master)](https://travis-ci.org/kotlin-graphics/assimp) 
-![](https://reposs.herokuapp.com/?path=kotlin-graphics/assimp&color=yellow) 
-[![Release](https://jitpack.io/v/kotlin-graphics/assimp.svg)](https://jitpack.io/#kotlin-graphics/assimp)
+[![Build Status](https://github.com/kotlin-graphics/assimp/workflows/build/badge.svg)](https://github.com/kotlin-graphics/assimp/actions?workflow=build)
+[![license](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/kotlin-graphics/assimp/blob/master/LICENSE) 
+[![Release](https://jitpack.io/v/kotlin-graphics/assimp.svg)](https://jitpack.io/#kotlin-graphics/assimp) 
+![Size](https://github-size-badge.herokuapp.com/kotlin-graphics/assimp.svg)
+[![Github All Releases](https://img.shields.io/github/downloads/kotlin-graphics/assimp/total.svg)]()
 [![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin) 
-[![Slack Status](http://slack.kotlinlang.org/badge.svg)](http://slack.kotlinlang.org/)
 
 JVM porting of [Assimp](https://github.com/assimp/assimp)
 
@@ -53,7 +54,7 @@ Advantages:
 - easier to debug
 - easier to modify/customize, e.g: textures get automatically loaded and offered via [gli library](https://github.com/kotlin-graphics/glm), you just have to upload them to GL
 - matrices are column-major instead of row-major and offered via the [glm library](https://github.com/kotlin-graphics/glm)
-- easier to fix (found a couple of bugs on the original assimp, opened an issue, I didnt have to wait for the next releases fix)
+- easier to fix (found a couple of bugs on the original assimp, opened an issue, I didn't have to wait for the next releases fix)
 - reduced the maintenance at minimum by keeping the same structure as possible during the port
 - possible to get the same loading speed, using binary assimp format
 

@@ -3,16 +3,17 @@ package assimp.md3
 import assimp.*
 import glm_.mat4x4.Mat4
 import glm_.vec3.Vec3
-import io.kotlintest.*
+import io.kotest.assertions.fail
+import io.kotest.matchers.shouldBe
 import java.io.*
 import java.nio.*
 import java.nio.file.*
 
 object europeanFnt {
 
-    operator fun invoke(fileName: String, shaderName: String) {
-		val fileName = fileName.replace('/', File.separatorChar)
-		val shaderName = shaderName.replace('/', File.separatorChar)
+    operator fun invoke(fileName_: String, shaderName_: String) {
+		val fileName = fileName_.replace('/', File.separatorChar)
+		val shaderName = shaderName_.replace('/', File.separatorChar)
 
 		logger.info("load from file $fileName")
         Importer().readFile(getResource(fileName))?.verify() ?: fail("could not load $fileName")

@@ -18,12 +18,11 @@ class ObjFileImporter : BaseImporter() {
             fileExtensions = listOf("obj"))
 
     /**  Returns true, if file is an obj file.  */
-    override fun canRead(file: String, ioSystem: IOSystem, checkSig: Boolean): Boolean {
-
-        if (!checkSig)   //Check File Extension
-            return file.substring(file.lastIndexOf('.') + 1) == "obj"
-        else //Check file Header
-            return false
+    override fun canRead(file: String, ioSystem: IOSystem, checkSig: Boolean): Boolean = when {
+        //Check File Extension
+        !checkSig -> file.substring(file.lastIndexOf('.') + 1) == "obj"
+        //Check file Header
+        else -> false
     }
 
     //  reference to load textures later
@@ -45,7 +44,7 @@ class ObjFileImporter : BaseImporter() {
         val parser = ObjFileParser(stream, ioSystem)
 
         // And create the proper return structures out of it
-        createDataFromImport(parser.m_pModel, scene, ioSystem)
+        createDataFromImport(parser.model, scene, ioSystem)
     }
 
     /**  Create the data from parsed obj-file   */
@@ -164,8 +163,10 @@ class ObjFileImporter : BaseImporter() {
 
             val faces = ArrayList<AiFace>()
 
-            if (pObjMesh.m_uiMaterialIndex != Mesh.NoMaterial)
+            if (pObjMesh.m_uiMaterialIndex != Mesh.NoMaterial) {
+//                logger.error("pMesh.materialIndex (${pMesh.materialIndex}) = pObjMesh.m_uiMaterialIndex (${pObjMesh.m_uiMaterialIndex})")
                 pMesh.materialIndex = pObjMesh.m_uiMaterialIndex
+            }
 
             var outIndex = 0
 
@@ -176,17 +177,17 @@ class ObjFileImporter : BaseImporter() {
                     AiPrimitiveType.LINE -> for (i in 0 until it.m_vertices.size - 1) {
                         val mNumIndices = 2
                         uiIdxCount += mNumIndices
-                        repeat(mNumIndices, { face.add(0) })
+                        repeat(mNumIndices) { face += 0 }
                     }
                     AiPrimitiveType.POINT -> for (i in 0 until it.m_vertices.size) {
                         val mNumIndices = 1
                         uiIdxCount += mNumIndices
-                        repeat(mNumIndices, { face.add(0) })
+                        repeat(mNumIndices) { face += 0 }
                     }
                     else -> {
                         val uiNumIndices = it.m_vertices.size
                         uiIdxCount += uiNumIndices
-                        repeat(uiNumIndices, { face.add(0) })
+                        repeat(uiNumIndices) { face += 0 }
                     }
                 }
                 faces.add(face)
@@ -217,20 +218,25 @@ class ObjFileImporter : BaseImporter() {
         else if (pMesh.numVertices > AI_MAX_ALLOC(AiVector3D.size))
             throw Exception("OBJ:" + pModel.m_ModelName + " | " + pMesh.name + " --> Too many vertices, would run out of memory")
 
-        pMesh.vertices = MutableList(pMesh.numVertices, { AiVector3D() })
+        pMesh.vertices = MutableList(pMesh.numVertices) { AiVector3D() }
 
         // Allocate buffer for normal vectors
-        if (pModel.m_Normals.isNotEmpty() && pObjMesh.m_hasNormals)
-            pMesh.normals = Array(pMesh.numVertices, { AiVector3D() }).toMutableList()
-
+        if (pModel.m_Normals.isNotEmpty() && pObjMesh.m_hasNormals) {
+//            System.err.println("pMesh.numVertices: ${pMesh.numVertices}")
+            pMesh.normals = MutableList(pMesh.numVertices) {
+//                System.err.println(it)
+                AiVector3D()
+            }
+        }
         // Allocate buffer for vertex-color vectors
+
         if (pModel.m_VertexColors.isNotEmpty())
-            pMesh.colors.add(Array(pMesh.numVertices, { AiColor4D() }).toMutableList())
+            pMesh.colors.add(Array(pMesh.numVertices) { AiColor4D() }.toMutableList())
         //pMesh.colors[0] = Array(pMesh.numVertices, { AiColor4D() }).toMutableList()
 
         // Allocate buffer for texture coordinates
         if (pModel.m_TextureCoord.isNotEmpty() && pObjMesh.m_uiUVCoordinates[0] != 0)
-            pMesh.textureCoords.add(MutableList(pMesh.numVertices, { floatArrayOf(0f, 0f) }))
+            pMesh.textureCoords.add(MutableList(pMesh.numVertices) { FloatArray(pModel.textureCoordDim) })
 
         // Copy vertices, normals and textures into aiMesh instance
         var newIndex = 0
@@ -277,7 +283,7 @@ class ObjFileImporter : BaseImporter() {
 
                 // Get destination face
                 val faceIndex = outIndex;
-                val pDestFace = pMesh.faces.getOrElse(faceIndex, { mutableListOf() })
+                val pDestFace = pMesh.faces.getOrElse(faceIndex) { mutableListOf() }
 
                 val last = vertexIndex == pSourceFace.m_vertices.lastIndex
 
@@ -323,9 +329,9 @@ class ObjFileImporter : BaseImporter() {
     /**  Creates the material   */
     fun createMaterials(pModel: Model, pScene: AiScene) {
 
-        val numMaterials = pModel.m_MaterialLib.size
+        val numMaterials = pModel.materialLib.size
         pScene.numMaterials = 0
-        if (pModel.m_MaterialLib.isEmpty()) {
+        if (pModel.materialLib.isEmpty()) {
             logger.debug { "OBJ: no materials specified" }
             return
         }
@@ -333,7 +339,7 @@ class ObjFileImporter : BaseImporter() {
         for (matIndex in 0 until numMaterials) {
 
             // Store material name
-            val pCurrentMaterial = pModel.m_MaterialMap[pModel.m_MaterialLib[matIndex]]
+            val pCurrentMaterial = pModel.materialMap[pModel.materialLib[matIndex]]
 
             // No material found, use the default material
             pCurrentMaterial ?: continue
@@ -428,7 +434,6 @@ class ObjFileImporter : BaseImporter() {
 
                             val typeStart = texFile.filename.lastIndexOf(".") + 1
                             val type = texFile.filename.substring(typeStart)
-
                             scene.textures[name] = gli.load(texFile.readBytes(), type)
                         }
                         ioSystem.exists(parentPath + cleaned.toUpperCase()) -> {
